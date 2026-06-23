@@ -531,8 +531,8 @@ function ContactsScreen({ onOpenChat, onOpenAbout, onOpenNotif, hasUnread }) {
           <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
             <div style={{ width: 63, height: 63, borderRadius: "50%", background: T.brandDef, color: "#fff", display: "grid", placeItems: "center", fontWeight: 700, fontSize: 20, flexShrink: 0 }}>י.א</div>
             <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
-              <span style={{ fontWeight: 700, fontSize: 16, color: T.navy }}>יואל אלקלעי</span>
-              <span style={{ fontWeight: 400, fontSize: 12, color: T.textMuted }}>מומחה UI/UX · 5 שנים במקורות</span>
+              <span style={{ fontWeight: 700, fontSize: 16, color: T.navy }}>דוד כהן</span>
+              <span style={{ fontWeight: 400, fontSize: 12, color: T.textMuted }}>מהנדס תפעול בכיר · 12 שנים במקורות</span>
               <span style={{ fontWeight: 400, fontSize: 12, color: T.textMuted }}>🐝 עובדה כיפית: מגדל דבורים</span>
               <div style={{ display: "flex", gap: 11, marginTop: 4 }}>
                 <a href="msteams://chat?email=o-ayoel@mekorot.co.il" style={{ display: "inline-flex", alignItems: "center", gap: 6, height: 38, padding: "0 16px", borderRadius: 19, background: T.surfaceTint, color: T.brandDef, fontWeight: 700, fontSize: 12.5, textDecoration: "none" }}>
@@ -552,9 +552,9 @@ function ContactsScreen({ onOpenChat, onOpenAbout, onOpenNotif, hasUnread }) {
           <SectionHead title="הצוות שלי" />
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {[
-              { initials: "ש.ז", name: "שירה זינגר", role: "מנהלת צוות חווית משתמש ו-UX", email: "szinger@mekorot.co.il", color: "#4d91ff" },
-              { initials: "ה.ב", name: "הגר ברקאי", role: "מיישם UI/UX", email: "o-hbarkai@mekorot.co.il", color: T.green },
-              { initials: "א.ה", name: "אלדר הדר", role: "מיישם UI/UX", email: "o-hpatel@mekorot.co.il", color: "#7c5cd6" },
+              { initials: "ש.ז", name: "רונית לוי", role: "מנהלת אגף התפלה", email: "szinger@mekorot.co.il", color: "#4d91ff" },
+              { initials: "ה.ב", name: "יוסי פרץ", role: "הנדסת תהליך", email: "o-hbarkai@mekorot.co.il", color: T.green },
+              { initials: "א.ה", name: "מאיה בר", role: "בקרת איכות", email: "o-hpatel@mekorot.co.il", color: "#7c5cd6" },
             ].map((p, i) => (
               <div key={i} style={{ display: "flex", alignItems: "center", gap: 16, padding: 16, background: T.surfaceCard, borderRadius: T.rCard, boxShadow: T.shadowCard, direction: "rtl" }}>
                 <div style={{ flex: "none", width: 48, height: 48, borderRadius: "50%", background: p.color, color: "#fff", display: "grid", placeItems: "center", fontWeight: 700, fontSize: 16 }}>{p.initials}</div>
