@@ -779,6 +779,7 @@ const TABS = [
 const SCREENS = [MainScreen, CertsScreen, ContactsScreen, EquipmentScreen, DocsScreen]
 
 export default function App() {
+  const [splashDone, setSplashDone] = useState(false)
   const [tab, setTab] = useState(0)
   const [chatOpen, setChatOpen] = useState(false)
   const [aboutOpen, setAboutOpen] = useState(false)
@@ -811,6 +812,18 @@ export default function App() {
         .suggestions-scroll::-webkit-scrollbar-thumb { background: #9cc8ec; border-radius: 4px; }
       `}</style>
       <div style={{ position: "relative", width: 390, minHeight: 844, margin: "24px auto", background: T.surfaceApp, overflow: "hidden", borderRadius: 28, boxShadow: "0 20px 60px rgba(10,40,80,0.25)", display: "flex", flexDirection: "column", direction: "rtl" }}>
+        {!splashDone && (
+          <div style={{ position: "absolute", inset: 0, zIndex: 100, background: "#000" }}>
+            <video
+              src="/splash.mp4"
+              autoPlay
+              muted
+              playsInline
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              onEnded={() => setSplashDone(true)}
+            />
+          </div>
+        )}
         {aboutOpen ? (
           <AboutPanel onClose={() => setAboutOpen(false)} />
         ) : (
