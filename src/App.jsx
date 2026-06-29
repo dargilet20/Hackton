@@ -241,42 +241,153 @@ function AboutPanel({ onClose }) {
 }
 
 function MainScreen({ onOpenChat, onOpenAbout, onOpenNotif, hasUnread }) {
+  const [selectedDay, setSelectedDay] = useState(3) // index 3 = רביעי (היום)
+  const [tasks, setTasks] = useState([
+    { id: 1, time: "08:00–08:30", title: "איסוף תג עובד", sub: "בלי הכרטיס אי אפשר להיכנס לקומות.", done: true, icon: "green", postponed: false, day: 3 },
+    { id: 2, time: "09:00–10:00", title: "תדריך בטיחות מתקן מרכזי", sub: "מתחיל בעוד 20 דק׳", done: false, icon: "blue", urgent: true, postponed: false, day: 3 },
+    { id: 3, time: "11:30–12:45", title: "סיור מעבדות ובקרת איכות", sub: "אגף איכות המים", done: false, icon: "purple", postponed: false, day: 3 },
+  ])
+
+  const toggleTask = (id) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, done: !t.done } : t))
+  }
+
+  const postponeTask = (id) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, postponed: true, day: Math.min(t.day + 1, 4) } : t))
+  }
+
+  const unpostponeTask = (id) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, postponed: false, day: selectedDay } : t))
+  }
+
+  const todayTasks = tasks.filter(t => t.day === selectedDay)
+  const totalDone = tasks.filter(t => t.done).length + 9
+  const totalTasks = 12
+  const progress = Math.round((totalDone / totalTasks) * 100)
+
   return (
     <>
       <AppHeader greeting={`בוקר טוב, ${USER.name.split(" ")[0]}`} sub={`${USER.role} · ${USER.location}`} onOpenAbout={onOpenAbout} onOpenNotif={onOpenNotif} hasUnread={hasUnread} />
       <div style={{ flex: 1, overflowY: "auto", background: T.surfaceApp, padding: "0 24px 120px" }}>
+
+        {/* כרטיס התקדמות */}
         <div style={{ marginTop: 16, position: "relative", zIndex: 2, display: "flex", flexDirection: "column", gap: 9, padding: "20px 16px", background: T.surfaceCard, borderRadius: T.rXl, boxShadow: T.shadowFloat, direction: "rtl" }}>
           <h2 style={{ fontWeight: 700, fontSize: 17, color: T.navy }}>כמעט סיימת את השבוע הראשון 🎉</h2>
-          <p style={{ fontWeight: 400, fontSize: 13, color: T.textBody }}>9 מתוך 12 משימות הושלמו</p>
+          <p style={{ fontWeight: 400, fontSize: 13, color: T.textBody }}>{totalDone} מתוך {totalTasks} משימות הושלמו</p>
           <div style={{ position: "relative", height: 14, width: "100%", background: T.surfaceTrack, borderRadius: 7, overflow: "hidden" }}>
-            <div style={{ position: "absolute", top: 0, right: 0, bottom: 0, width: "75%", background: T.gradProgress, borderRadius: 7 }} />
+            <div style={{ position: "absolute", top: 0, right: 0, bottom: 0, width: `${progress}%`, background: T.gradProgress, borderRadius: 7, transition: "width 0.4s" }} />
           </div>
-          <p style={{ fontWeight: 500, fontSize: 12, color: T.brandStrong }}>75% מהמסע — עוד 2 משימות היום ואת/ה שם! 💪</p>
+          <p style={{ fontWeight: 500, fontSize: 12, color: T.brandStrong }}>
+            {progress}% מהמסע — {totalTasks - totalDone} משימות נותרו לשבוע! 💪
+          </p>
         </div>
 
+        {/* שורת ימים */}
         <div style={{ display: "flex", gap: 8, marginTop: 28, justifyContent: "space-between" }}>
-          {DAYS.map((d, i) => (
-            <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4, height: 70, justifyContent: "center", position: "relative", background: d.active ? "rgba(69,140,255,0.95)" : T.surfaceCard, border: `1px solid ${d.active ? "transparent" : T.borderCard}`, borderRadius: T.rCard }}>
-              {d.done && !d.active && <span style={{ position: "absolute", top: -8, left: "50%", transform: "translateX(-50%)", background: "#fff", borderRadius: "50%", width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center", color: T.green, fontSize: 11, boxShadow: T.shadowCard }}>✓</span>}
-              <span style={{ fontWeight: 500, fontSize: 11, color: d.active ? "#e3f0f7" : T.textMuted }}>{d.day}</span>
-              <span style={{ fontWeight: 700, fontSize: 14, color: d.active ? "#fff" : "#33495e" }}>{d.date}</span>
-            </div>
-          ))}
+          {DAYS.map((d, i) => {
+            const dayTasks = tasks.filter(t => t.day === i)
+            const hasPostponed = dayTasks.some(t => t.postponed)
+            const isSelected = selectedDay === i
+            return (
+              <div key={i} onClick={() => setSelectedDay(i)} style={{
+                flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+                height: 70, justifyContent: "center", position: "relative",
+                background: isSelected ? "rgba(69,140,255,0.95)" : T.surfaceCard,
+                border: `1px solid ${isSelected ? "transparent" : T.borderCard}`,
+                borderRadius: T.rCard, cursor: "pointer", transition: "all 0.2s",
+              }}>
+                {d.done && !isSelected && <span style={{ position: "absolute", top: -8, left: "50%", transform: "translateX(-50%)", background: "#fff", borderRadius: "50%", width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center", color: T.green, fontSize: 11, boxShadow: T.shadowCard }}>✓</span>}
+                {hasPostponed && !isSelected && <span style={{ position: "absolute", top: -8, right: 4, background: T.orange, borderRadius: "50%", width: 14, height: 14, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, color: "#fff" }}>!</span>}
+                <span style={{ fontWeight: 500, fontSize: 11, color: isSelected ? "#e3f0f7" : T.textMuted }}>{d.day}</span>
+                <span style={{ fontWeight: 700, fontSize: 14, color: isSelected ? "#fff" : "#33495e" }}>{d.date}</span>
+                {dayTasks.length > 0 && (
+                  <span style={{ fontSize: 9, color: isSelected ? "rgba(255,255,255,0.8)" : T.textMuted }}>{dayTasks.length} משימות</span>
+                )}
+              </div>
+            )
+          })}
         </div>
 
+        {/* משימות היום הנבחר */}
         <div style={{ display: "flex", flexDirection: "column", gap: 16, marginTop: 28 }}>
-          <SectionHead title="המשימות שלך היום" link="הכל" />
+          <SectionHead title={`משימות ליום ${DAYS[selectedDay].day}`} link="הכל" />
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <Tile done iconBox={{ style: { background: T.green, color: "#fff" }, content: <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" width={22} height={22}><path d="M20 6 9 17l-5-5"/></svg> }} title="איסוף תג עובד" sub="08:00–08:30 · הושלם" subVariant="ok" />
-            <Tile highlight iconBox={{ style: { background: T.brandStrong, color: "#fff" }, content: <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" width={22} height={22}><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18"/></svg> }} title="תדריך בטיחות מתקן מרכזי" sub="09:00–10:00 · מתחיל בעוד 20 דק׳" subVariant="info" badge={<Badge variant="required">חובה</Badge>} />
-            <Tile iconBox={{ style: { background: T.purpleTint, color: "#6b4fb0" }, content: <svg viewBox="0 0 24 24" fill="none" stroke="#6b4fb0" strokeWidth="1.8" width={22} height={22}><path d="M9 3v2m6-2v2M4 9h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/></svg> }} title="סיור מעבדות ובקרת איכות" sub="11:30–12:45 · אגף איכות המים" />
+            {todayTasks.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "32px 0", color: T.textMuted, fontSize: 14 }}>
+                אין משימות ליום זה 🎉
+              </div>
+            ) : todayTasks.map(t => (
+              <div key={t.id} style={{
+                display: "flex", flexDirection: "column",
+                background: t.urgent && !t.done && !t.postponed ? T.surfaceTint2 : T.surfaceCard,
+                borderRadius: T.rCard, boxShadow: T.shadowCard,
+                border: t.urgent && !t.done && !t.postponed ? `1px solid ${T.borderHL}` : t.postponed ? `1px solid ${T.borderTint}` : "none",
+                direction: "rtl", overflow: "hidden", opacity: t.postponed ? 0.7 : 1,
+                transition: "all 0.2s",
+              }}>
+                <div onClick={() => !t.postponed && toggleTask(t.id)} style={{ display: "flex", alignItems: "center", gap: 16, padding: "13px 16px", cursor: t.postponed ? "default" : "pointer" }}>
+                  <div style={{
+                    flex: "none", width: 46, height: 46, display: "flex", alignItems: "center", justifyContent: "center",
+                    borderRadius: T.rMd, transition: "background 0.3s",
+                    background: t.postponed ? T.surfaceTrack : t.done ? T.green : t.icon === "blue" ? T.brandStrong : T.purpleTint,
+                    color: t.postponed ? T.textMuted : t.done || t.icon === "blue" ? "#fff" : "#6b4fb0",
+                  }}>
+                    {t.postponed ? (
+                      <svg viewBox="0 0 24 24" fill="none" stroke={T.textMuted} strokeWidth="1.8" width={22} height={22}><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                    ) : t.done ? (
+                      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" width={22} height={22}><path d="M20 6 9 17l-5-5"/></svg>
+                    ) : t.icon === "blue" ? (
+                      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" width={22} height={22}><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18"/></svg>
+                    ) : (
+                      <svg viewBox="0 0 24 24" fill="none" stroke="#6b4fb0" strokeWidth="1.8" width={22} height={22}><path d="M9 3v2m6-2v2M4 9h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/></svg>
+                    )}
+                  </div>
+                  <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 5, alignItems: "flex-start" }}>
+                    <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                      <span style={{ fontWeight: 700, fontSize: 14, color: t.done ? T.textMuted : T.navy, textDecoration: t.done ? "line-through" : "none" }}>{t.title}</span>
+                      {t.urgent && !t.done && !t.postponed && <Badge variant="required">חובה</Badge>}
+                      {t.postponed && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 8, background: T.surfaceTint, color: T.brandDeep, fontWeight: 600 }}>הועבר מ{DAYS[t.day - 1]?.day}</span>}
+                    </div>
+                    <span style={{ fontWeight: 400, fontSize: 12, color: t.done ? T.green : T.textMuted }}>
+                      {t.done ? "✓ הושלם" : `${t.time} · ${t.sub}`}
+                    </span>
+                  </div>
+                </div>
+
+                {/* כפתורי פעולה */}
+                <div style={{ display: "flex", gap: 8, padding: "0 16px 12px", direction: "rtl", flexWrap: "wrap" }}>
+                  {t.postponed ? (
+                    <button onClick={() => unpostponeTask(t.id)} style={{ display: "inline-flex", alignItems: "center", gap: 5, height: 30, padding: "0 12px", background: T.orangeTint, color: T.orange, border: "none", borderRadius: 15, fontWeight: 600, fontSize: 11, cursor: "pointer", fontFamily: "inherit" }}>
+                      ↩ החזר להיום
+                    </button>
+                  ) : t.done ? (
+                    <button onClick={() => toggleTask(t.id)} style={{ display: "inline-flex", alignItems: "center", gap: 5, height: 30, padding: "0 12px", background: T.orangeTint, color: T.orange, border: "none", borderRadius: 15, fontWeight: 600, fontSize: 11, cursor: "pointer", fontFamily: "inherit" }}>
+                      ↩ בטל סימון
+                    </button>
+                  ) : (
+                    <>
+                      <button onClick={() => toggleTask(t.id)} style={{ display: "inline-flex", alignItems: "center", gap: 5, height: 30, padding: "0 12px", background: T.greenTint, color: T.greenDeep, border: "none", borderRadius: 15, fontWeight: 600, fontSize: 11, cursor: "pointer", fontFamily: "inherit" }}>
+                        ✓ סמן כהושלם
+                      </button>
+                      {t.day < 4 && (
+                        <button onClick={() => postponeTask(t.id)} style={{ display: "inline-flex", alignItems: "center", gap: 5, height: 30, padding: "0 12px", background: T.surfaceTint, color: T.brandDeep, border: "none", borderRadius: 15, fontWeight: 600, fontSize: 11, cursor: "pointer", fontFamily: "inherit" }}>
+                          📅 העבר ל{DAYS[t.day + 1]?.day}
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
+        {/* וידאו */}
         <div style={{ width: "calc(100% + 48px)", marginInline: -24, marginTop: 28, height: 220, overflow: "hidden" }}>
           <video src="/mascots/lab.mp4" controls playsInline style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         </div>
 
+        {/* תעודה דיגיטלית */}
         <div style={{ display: "flex", flexDirection: "column", gap: 16, marginTop: 28 }}>
           <SectionHead title="התעודה הדיגיטלית שלי" />
           <div style={{ position: "relative", overflow: "hidden", display: "flex", alignItems: "center", gap: 16, padding: 18, minHeight: 166, borderRadius: T.rXl, background: T.gradIdCard, color: "#fff", direction: "rtl" }}>
@@ -295,6 +406,7 @@ function MainScreen({ onOpenChat, onOpenAbout, onOpenNotif, hasUnread }) {
           </div>
         </div>
 
+        {/* מסמכים */}
         <div style={{ display: "flex", flexDirection: "column", gap: 16, marginTop: 28 }}>
           <SectionHead title="מסמכים ומדריכים" link="הכל" />
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -303,6 +415,7 @@ function MainScreen({ onOpenChat, onOpenAbout, onOpenNotif, hasUnread }) {
           </div>
         </div>
 
+        {/* T.A.L CTA */}
         <button onClick={onOpenChat} style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", marginTop: 28, padding: "20px 16px", background: T.surfaceTint, border: `1px solid ${T.borderTint}`, borderRadius: T.rXl, cursor: "pointer", direction: "rtl" }}>
           <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6, alignItems: "flex-start" }}>
             <span style={{ fontWeight: 700, fontSize: 16, color: T.brandDeep }}>צריך/ה עזרה עם מסמך?</span>
